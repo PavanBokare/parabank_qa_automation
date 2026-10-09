@@ -33,7 +33,7 @@ export class RequestLoanPage {
   }
 
   async open(): Promise<void> {
-    await this.page.goto('https://parabank.parasoft.com/parabank/requestloan.htm');
+    await this.page.goto('/parabank/requestloan.htm');
   }
 
   /**

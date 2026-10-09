@@ -19,7 +19,7 @@ export class AccountOverviewPage {
   }
 
   async open(): Promise<void> {
-    await this.page.goto('https://parabank.parasoft.com/parabank/overview.htm');
+    await this.page.goto('/parabank/overview.htm');
   }
 
   /**
@@ -27,15 +27,29 @@ export class AccountOverviewPage {
    * the overview table. Auto-waits for the AJAX-populated row to appear and
    * returns the parsed numeric balance (e.g. "$1,234.56" -> 1234.56).
    */
+
   async getBalanceForAccount(accountId: string | number): Promise<number> {
     const id = String(accountId);
+
+    await this.accountTable.waitFor({ state: 'visible' });
+
     const row = this.accountRows.filter({
-      has: this.page.locator(`a:text-is("${id}")`),
+      has: this.page.locator('a').getByText(id, { exact: true }),
     });
 
-    await row.waitFor({ state: 'visible' });
-    const balanceText = await row.locator('td').nth(1).innerText();
+    try {
+      await row.waitFor({ state: 'visible', timeout: 10_000 });
+    } catch {
+      const tableText = await this.accountTable.innerText().catch(() => '');
+      const pageUrl = this.page.url();
 
+      throw new Error(
+        `Account ${id} was not found in the overview table. ` +
+        `URL=${pageUrl}; table content=${JSON.stringify(tableText)}`
+      );
+    }
+
+    const balanceText = await row.locator('td').nth(1).innerText();
     return parseCurrency(balanceText);
   }
 }

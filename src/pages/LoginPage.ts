@@ -23,6 +23,6 @@ export class LoginPage {
   }
 
   async open(){
-    await this.page.goto('https://parabank.parasoft.com/parabank/index.htm');
+    await this.page.goto('/parabank/index.htm');
   }
 }
