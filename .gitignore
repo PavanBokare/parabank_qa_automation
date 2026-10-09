@@ -1,0 +1,23 @@
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# Generated custom report output
+/reports/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Local editor settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
