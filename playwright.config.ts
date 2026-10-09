@@ -4,14 +4,16 @@ import { UI_BASE_URL } from './src/config/env';
 
 export default defineConfig({
   testDir: './tests',
-  testIgnore: ['**/transfer-funds.spec.ts'],
 
   fullyParallel: false,
   workers: 1,
+  retries: 1,
 
   use: {
     baseURL: UI_BASE_URL,
     trace: 'on-first-retry',
+    screenshot: 'off',
+    video: 'retain-on-failure',
     headless: true,
   },
 

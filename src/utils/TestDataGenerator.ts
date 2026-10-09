@@ -1,3 +1,7 @@
+import { randomUUID } from 'node:crypto';
+
+import loanRequestJson from '../../testData/loan-request.json';
+
 export interface UserData {
   firstName: string;
   lastName: string;
@@ -12,7 +16,7 @@ export interface UserData {
 }
 
 export function generateUser(): UserData {
-  const uniqueId = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
+  const uniqueId = randomUUID().replace(/-/g, '').slice(0, 16);
 
   return {
     firstName: 'Test',
@@ -23,7 +27,7 @@ export function generateUser(): UserData {
     zipCode: '440001',
     phoneNumber: '9876543210',
     ssn: '123456789',
-    username: `qa_test_${uniqueId}`,
+    username: `qa_${uniqueId}`,
     password: 'Test@12345',
   };
 }
@@ -34,11 +38,12 @@ export interface LoanRequestData {
 }
 
 /**
- * Loan values for Scenario A — kept as test data outside Page Objects.
+ * Loan values for Scenario A — data lives in testData/loan-request.json;
+ * this typed export keeps existing consumers unchanged.
  * Verified against the public environment: amount=500 with downPayment=50 is
  * approved when the source checking balance is $100.00 (downPayment <= balance).
  */
 export const loanRequest: LoanRequestData = {
-  amount: 500,
-  downPayment: 50,
+  amount: loanRequestJson.amount,
+  downPayment: loanRequestJson.downPayment,
 };

@@ -30,25 +30,25 @@ export class RegisterPage {
   constructor(page: Page) {
 
     this.page = page;
-    this.firstNameInput = page.locator('//input[@id="customer.firstName"]');
-    this.lastNameInput = page.locator('//input[@id="customer.lastName"]');
-    this.addressInput = page.locator('//input[@id="customer.address.street"]');
-    this.cityInput = page.locator('//input[@id="customer.address.city"]');
-    this.stateInput = page.locator('//input[@id="customer.address.state"]');
-    this.zipCodeInput = page.locator('//input[@id="customer.address.zipCode"]');
-    this.phoneNumberInput = page.locator('//input[@id="customer.phoneNumber"]');
-    this.ssnInput = page.locator('//input[@id="customer.ssn"]');
-    this.usernameInput = page.locator('//input[@id="customer.username"]');
-    this.passwordInput = page.locator('//input[@id="customer.password"]');
-    this.repeatedPasswordInput = page.locator('//input[@id="repeatedPassword"]');
-    this.registerButton = page.locator('//input[@class="button"][@value="Register"]');
+    this.firstNameInput = page.locator('input[id="customer.firstName"]');
+    this.lastNameInput = page.locator('input[id="customer.lastName"]');
+    this.addressInput = page.locator('input[id="customer.address.street"]');
+    this.cityInput = page.locator('input[id="customer.address.city"]');
+    this.stateInput = page.locator('input[id="customer.address.state"]');
+    this.zipCodeInput = page.locator('input[id="customer.address.zipCode"]');
+    this.phoneNumberInput = page.locator('input[id="customer.phoneNumber"]');
+    this.ssnInput = page.locator('input[id="customer.ssn"]');
+    this.usernameInput = page.locator('input[id="customer.username"]');
+    this.passwordInput = page.locator('input[id="customer.password"]');
+    this.repeatedPasswordInput = page.locator('input[id="repeatedPassword"]');
+    this.registerButton = page.locator('input[class="button"][value="Register"]');
     this.registrationError = page.locator('[id="customer.username.errors"]');
     this.registrationConfirmation = page.getByText('Your account was created successfully');
   }
 
 
   async open(){
-    await this.page.goto('https://parabank.parasoft.com/parabank/register.htm');
+    await this.page.goto('/parabank/register.htm');
   }
 
 
@@ -115,6 +115,6 @@ export class RegisterPage {
    * logout endpoint so Scenario A can perform an explicit login afterwards.
    */
   async logout(): Promise<void> {
-    await this.page.goto('https://parabank.parasoft.com/parabank/logout.htm');
+    await this.page.goto('/parabank/logout.htm');
   }
 }
