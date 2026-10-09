@@ -94,3 +94,12 @@ These limitations are documented explicitly and should not be interpreted as suc
 ## Design Decisions
 
 See [DECISIONS.md](DECISIONS.md) for details about shared environment contention, currency precision, API versus UI responsibilities, reporting, and test reliability.
+
+## Branching and Pull Request Workflow
+
+* Create feature branches from the default branch before making changes.
+* Commit implementation changes on the feature branch.
+* Push the feature branch to GitHub.
+* Open a pull request to review changes before merging into the default branch.
+
+Example feature branch: `feature/parabank-qa-framework`
