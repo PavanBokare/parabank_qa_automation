@@ -40,6 +40,15 @@ API calls are useful for preconditions and data validation, while UI tests verif
 
 **Customer-creation finding (verified by investigation):** Read-only inspection of ParaBank's published OpenAPI specification, SOAP WSDL, and upstream source found **no supported customer-creation REST operation** — the only customer write endpoint updates an existing customer. Scenario C therefore generates a new user and creates it by submitting ParaBank's MVC registration form (`register.htm`) over plain HTTP without a browser: a GET first (to establish the controller's session state), then a URL-encoded POST of the verified form fields. **This is browser-free HTTP form submission, not REST API customer creation,** and must never be described as such. The test classifies the response (`created`, `duplicate-username`, `validation-failed`, `unexpected-response`) and fails honestly if creation does not succeed — it never falls back to the demo user and never hides the gap behind a silent skip. Login, account lookup, deposit, and transaction-history validation then run through the existing API helper against the newly created customer.
 
+**Closed transaction schema (Scenario C runtime validation):** Every row returned by `GET /accounts/{accountId}/transactions` is validated against a **closed six-key schema** — exactly `id`, `accountId`, `type`, `date`, `amount`, and `description`, matching the live response shape. The runtime checks are:
+
+* **Exact key set:** the row's enumerable key count must equal six *and* every expected key must be present — so **missing fields and unexpected extra enumerable keys are both rejected** (the schema is closed, not open-ended).
+* **Field types:** `id`, `accountId`, `date`, and `amount` must be numbers, `description` must be a string — **wrong field types are rejected**.
+* **Enumerated values:** `type` must be exactly `"Credit"` or `"Debit"` — **anything else is rejected**.
+* **Diagnostics:** a failing row produces an assertion message that reports the received key set (via a `describeRow()` helper) instead of a generic shape error, so a schema drift is immediately visible in the failure output.
+
+These checks run at test time against live API responses; they are validation logic, not a claim about undocumented future response shapes.
+
 ## 4. Test Reporting
 
 **Decision:**
@@ -92,6 +101,6 @@ Results recorded by inspection step (no dates, guarantees, or results beyond the
 * `npx tsc --noEmit` — passed in Steps 18C and 18G with no TypeScript errors.
 * ESLint — `npx eslint .` executed project-wide in Steps 18D and 18H: 0 errors and 10 warnings each run; the warnings concern the existing conditional/skipped-test logic and the `expect-expect` rule. Earlier project-wide and targeted lint runs also reported 0 errors with pre-existing warnings.
 * `npx playwright test --list` — discovery only; 7 tests in 6 files (Step 12D).
-* `npx playwright test tests/apiCustomerRegistrationAndTransactions.spec.ts` — targeted run passed after the browser-free registration implementation (Step 9).
+* `npx playwright test tests/apiCustomerRegistrationAndTransactions.spec.ts` — targeted run passed after the browser-free registration implementation (Step 9). **Latest approved targeted run after the strict schema-validation change: 1 passed, exit code 0** (recorded result, not a guarantee).
 * `npx playwright test tests/loginPageSmoke.spec.ts` — targeted run passed 1/1 in Steps 17B and 18B.
-* Full suite (`npx playwright test`) — re-run in Step 20B after the retries/artifact configuration, Scenario C rework, JSON test-data migration, and URL centralization: 7 passed, 0 failed, 0 skipped, no retries, 54.2 seconds (exit code 0). A single successful run against the shared public database does not guarantee future runs — environment contention, the Scenario A→B dependency, and demo-user risks remain.
+* Full suite (`npx playwright test`) — re-run in Step 20B after the retries/artifact configuration, Scenario C rework, JSON test-data migration, and URL centralization: 7 passed, 0 failed, 0 skipped, no retries, 54.2 seconds (exit code 0). **Latest recorded full-suite result** (from the existing report, not re-run): 7 passed, 0 failed, 0 skipped, 0 flaky, approximately 65 seconds. These are **recorded results of specific runs, not guarantees**: a single successful run against the shared public database does not guarantee future runs — environment contention, the Scenario A→B dependency, and demo-user risks remain.
