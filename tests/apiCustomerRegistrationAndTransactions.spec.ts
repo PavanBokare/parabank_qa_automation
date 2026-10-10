@@ -22,7 +22,22 @@ function isTransaction(value: unknown): value is Transaction {
 
   const item = value as Record<string, unknown>;
 
+  // Exact schema: the key set must be closed — reject missing fields and
+  // unexpected extra enumerable keys alike.
+  const expectedKeys = [
+    'id',
+    'accountId',
+    'type',
+    'date',
+    'amount',
+    'description',
+  ];
+  const keysExact =
+    Object.keys(item).length === expectedKeys.length &&
+    expectedKeys.every((key) => key in item);
+
   return (
+    keysExact &&
     typeof item.id === 'number' &&
     typeof item.accountId === 'number' &&
     (item.type === 'Credit' || item.type === 'Debit') &&
@@ -30,6 +45,15 @@ function isTransaction(value: unknown): value is Transaction {
     typeof item.amount === 'number' &&
     typeof item.description === 'string'
   );
+}
+
+/** Human-readable summary of an invalid row, for assertion messages. */
+function describeRow(value: unknown): string {
+  if (typeof value === 'object' && value !== null) {
+    return `keys: ${Object.keys(value).join(', ')}`;
+  }
+
+  return `value: ${String(value)}`;
 }
 
 test('Scenario C: API-only account and transaction history validation', async ({
@@ -98,7 +122,11 @@ expect(Number.isFinite(account.balance)).toBe(true);
   expect((history as unknown[]).length).toBeGreaterThan(0);
 
   for (const item of history as unknown[]) {
-    expect(isTransaction(item), 'Unexpected transaction response shape').toBe(true);
+    expect(
+      isTransaction(item),
+      `Transaction schema mismatch (expected exactly the six ` +
+        `Transaction fields) — received ${describeRow(item)}`,
+    ).toBe(true);
   }
 
   // The $10 deposit must appear in THIS account's transaction history:
