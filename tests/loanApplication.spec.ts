@@ -19,6 +19,10 @@ const KNOWN_REGISTRATION_ERROR = 'This username already exists.';
 // Scenario B transfer amounts — single source of truth in test data JSON.
 const TRANSFER_AMOUNTS = transferAmountsJson.transferAmounts;
 
+// Number of outgoing transfers this scenario performs — also the minimum set
+// of rows the Find Transactions page must render before Scenario B parses them.
+const EXPECTED_TRANSFER_COUNT = TRANSFER_AMOUNTS.length;
+
 let scenarioAContext: ScenarioAContext | undefined;
 
 /**
@@ -41,6 +45,7 @@ test.setTimeout(60_000);
 
 // 1. API preconditions.
 await adminApi.cleanDatabase();
+await adminApi.initializeDatabase();
 await adminApi.setLoanProviderToWebService();
 
 // 2. Generate unique test credentials.
@@ -307,12 +312,17 @@ await findTransactionsPage.findByDateRange(
 );
 
 // 7. Parse transaction rows and sum transfer debits using integer cents.
-const transactionRows = await findTransactionsPage.getTransactionRows();
+const transactionRows = await findTransactionsPage.getTransactionRows(
+  EXPECTED_TRANSFER_COUNT,
+);
 
 console.log('Scenario B transaction rows:', transactionRows);
 
 const transferDebitAmountsCents =
-  await findTransactionsPage.getTransferDebitAmountsCents();
+  await findTransactionsPage.getTransferDebitAmountsCents(
+    EXPECTED_TRANSFER_COUNT,
+    transactionRows,
+  );
 
 const tableDeductionCents = transferDebitAmountsCents.reduce(
   (sum, cents) => sum + cents,
@@ -327,7 +337,7 @@ expect(
 expect(
   transferDebitAmountsCents,
   'Transaction history must contain exactly three transfer debits',
-).toHaveLength(3);
+).toHaveLength(EXPECTED_TRANSFER_COUNT);
 
 });
 });

@@ -1,5 +1,5 @@
 
-import { test, expect } from '../src/fixtures/testFixtures';
+import { apiTest as test, expect } from '../src/fixtures/testFixtures';
 import { generateUser } from '../src/utils/TestDataGenerator';
 import { amountToCents, parseMoneyToCents } from '../src/utils/MoneyUtil';
 
