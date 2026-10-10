@@ -66,4 +66,15 @@ export const test = base.extend<Fixtures>({
   ],
 });
 
+/**
+ * API-only test: provides the same `adminApi` fixture as `test` but WITHOUT
+ * the automatic screenshot fixture, so no `page` (browser) fixture is ever
+ * part of the fixture graph. Use this for purely headless/API tests.
+ */
+export const apiTest = base.extend<Omit<Fixtures, 'unexpectedFailureScreenshot'>>({
+  adminApi: async ({ request }, use) => {
+    await use(new AdminApi(request));
+  },
+});
+
 export { expect };

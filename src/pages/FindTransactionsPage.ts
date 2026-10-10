@@ -47,8 +47,24 @@ export class FindTransactionsPage {
     await expect(this.transactionTable).toBeVisible();
   }
 
-  async getTransactionRows(): Promise<string[][]> {
+  /**
+   * Parses the rendered #transactionTable rows.
+   *
+   * @param minExpectedTransferRows When > 0, conditionally waits until at least
+   *   this many outgoing-transfer rows ("funds transfer sent") are attached
+   *   before parsing. The timeout is only a failure ceiling — the wait returns
+   *   as soon as the condition is met. Callers supply the expected count; this
+   *   page object holds no test data.
+   */
+  async getTransactionRows(minExpectedTransferRows = 0): Promise<string[][]> {
     await expect(this.transactionTable).toBeVisible();
+
+    if (minExpectedTransferRows > 0) {
+      await this.transactionRows
+        .filter({ hasText: /funds transfer sent/i })
+        .nth(minExpectedTransferRows - 1)
+        .waitFor({ state: 'attached', timeout: 10_000 });
+    }
 
     const rows = await this.transactionRows.all();
     const transactionRows: string[][] = [];
@@ -66,11 +82,23 @@ export class FindTransactionsPage {
     return transactionRows;
   }
 
-  async getTransferDebitAmountsCents(): Promise<number[]> {
-  const rows = await this.getTransactionRows();
+  /**
+   * Extracts outgoing-transfer debit amounts in integer cents.
+   *
+   * @param minExpectedTransferRows Passed to `getTransactionRows` when rows
+   *   must be read here (conditional row-wait behavior unchanged).
+   * @param rows Already-parsed table rows from a previous `getTransactionRows`
+   *   call; when provided they are reused instead of re-reading the table.
+   */
+  async getTransferDebitAmountsCents(
+    minExpectedTransferRows = 0,
+    rows?: string[][],
+  ): Promise<number[]> {
+  const parsedRows =
+    rows ?? (await this.getTransactionRows(minExpectedTransferRows));
   const amounts: number[] = [];
 
-  for (const row of rows) {
+  for (const row of parsedRows) {
     const description = row
       .slice(0, -1)
       .join(' ')
